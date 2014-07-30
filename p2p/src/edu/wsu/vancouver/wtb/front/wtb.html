@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Wough Tarfa Baris</title>
+		<link href="wtb.css" rel="stylesheet" type="text/css" />
+		<script src="wtb.js" type="text/javascript"></script>
+		<script>
+			var wtb = wtbConnect("");
+			var currentlyRunningSearch = false;
+			var currentSearchResults = [];
+
+			function handleSearch(uuid) {
+				currentSearchResults = [];
+				clearResults();
+				currentlyRunningSearch = uuid;
+			}
+
+			window.setInterval(function () {
+				if (!currentlyRunningSearch) {
+					return;
+				}
+				wtb.getResults(currentlyRunningSearch, function (results) {
+					for (var i = 0; i < results.length; i++) {
+						var newFile = true;
+						for (var j = 0; j < currentSearchResults.length; j++) {
+							if (i.SHA512Hash === j.SHA512Hash) {
+								newFile = false;
+								break;
+							}
+						}
+						if (newFile) {
+							currentSearchResults.push(results[i]);
+							pushResult(results[i]);
+						}
+					}
+				});
+			}, 100);
+			
+			function pushResult(result) {
+				result = wtb.makeSearchResult(result);
+				document.getElementById('results').appendChild(result);
+				window.setTimeout(function () {
+					result.className = "";
+				}, 100);
+			}
+
+			function clearResults() {
+				var results = document.getElementById('results');
+				while (results.hasChildNodes()) {
+					results.removeChild(results.lastChild);
+				}
+			}
+
+			function clearTransfers() {
+				var results = document.getElementById('transfers');
+				while (results.hasChildNodes()) {
+					results.removeChild(results.lastChild);
+				}
+			}
+
+			function toggleTransfers() {
+				document.documentElement.classList.toggle("transfers");
+			}
+
+		</script>
+	</head>
+	<body>
+		<ul id="transfers">
+			<li>
+				<div class="title">
+					The Art of Computer Programming
+				</div>
+				<div class="time">
+					<div class="eta">
+						3:14
+					</div>
+					<div class="meter">
+						<span style="width: 100%">80%</span>
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="title">
+					Snow Crash
+				</div>
+				<div class="time">
+					<div class="eta">
+						3:11
+					</div>
+					<div class="meter">
+						<span style="width: 100%">40%</span>
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="title">
+					The Hitchhiker's Guide to the Galaxy
+				</div>
+				<div class="time">
+					<div class="eta">
+						2:01
+					</div>
+					<div class="meter">
+						<span style="width: 100%">10%</span>
+					</div>
+				</div>
+			</li>
+		</ul>
+		<div id="search">
+			<h1>Wough Tarfa Baris P-2-P</h1>
+			<form onSubmit="wtb.search(document.forms[0].q.value, handleSearch); return false;">
+				<input name="q" type="search" />
+				<input type="submit" value="Search" />
+			</form>
+			<ul id="results">
+			</ul>
+		</div>
+	</body>
+</html>
